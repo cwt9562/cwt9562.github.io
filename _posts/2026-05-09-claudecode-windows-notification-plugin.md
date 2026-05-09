@@ -101,8 +101,10 @@ ClaudeCode 在实际使用中会触发一些关键事件：
 ### 3.2 脚本内容
 
 下面是完整的 PowerShell 脚本内容，你可以直接保存到 `C:\Users\<当前用户>\.claude\windows-notification.ps1`：
+请将文件保存为`UTF-8 with BOM`格式
 
 ```powershell
+# Force UTF-8
 [Console]::InputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
@@ -110,6 +112,30 @@ ClaudeCode 在实际使用中会触发一些关键事件：
 # Toast Settings
 # =========================
 $toastTitle = "ClaudeCode"
+
+# =========================
+# Helper: Truncate body
+# - Take at most 2 lines (split by \n, \r\n, or `r`n)
+# - Then truncate to 50 chars (47 + "...")
+# =========================
+function Truncate-Body {
+    param([string]$text)
+
+    # Normalize line endings to `n first
+    $normalized = $text.Replace("`r`n", "`n").Replace("`r", "`n")
+    # Split and take first 2 lines
+    $lines = $normalized -split "`n"
+    $firstTwo = $lines[0]
+    if ($lines.Count -gt 1) {
+        $firstTwo = "$($lines[0])`n$($lines[1])"
+    }
+
+    # Then truncate to 50 chars
+    if ($firstTwo.Length -gt 50) {
+        return $firstTwo.Substring(0, 47) + "..."
+    }
+    return $firstTwo
+}
 
 # =========================
 # Read stdin (safe for PS 5.1, never blocks)
@@ -171,9 +197,7 @@ if ($data) {
             $body = "对话因 API 错误异常结束"
         }
 
-        if ($body.Length -gt 150) {
-            $body = $body.Substring(0, 147) + "..."
-        }
+        $body = Truncate-Body $body
 
         $needsAction = $true
     # =========================
@@ -197,9 +221,7 @@ if ($data) {
             $body = "任务完成，请查看结果"
         }
 
-        if ($body.Length -gt 50) {
-            $body = $body.Substring(0, 47) + "..."
-        }
+        $body = Truncate-Body $body
 
         $needsAction = $false
     } else {
@@ -223,9 +245,7 @@ if ($data) {
         # Use message from stdin
         if ($data.message -and $data.message.Trim() -ne "") {
             $body = $data.message
-            if ($body.Length -gt 150) {
-                $body = $body.Substring(0, 147) + "..."
-            }
+            $body = Truncate-Body $body
         }
 
         # Use title from stdin if available (prepend project name)
