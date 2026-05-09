@@ -2,6 +2,7 @@
 layout: post
 title: "为 ClaudeCode 写一个 Windows 消息提醒插件"
 date: 2026-05-09 09:00:00 +0800
+tags: [VibeCoding]
 ---
 
 # 为 ClaudeCode 写一个 Windows 消息提醒插件：用法、功能与关键设计
