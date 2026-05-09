@@ -154,6 +154,9 @@ baseurl: ""
 
 # ------------ The following options are not recommended to be modified ------------------
 
+# Allow posts with future dates to be published
+future: true
+
 kramdown:
   footnote_backlink: "&#8617;&#xfe0e;"
   syntax_highlighter: rouge
